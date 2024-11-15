@@ -1,6 +1,4 @@
 xlsxwriter    
 pyperclip   
 pandas
-time
-datetime
 streamlit            

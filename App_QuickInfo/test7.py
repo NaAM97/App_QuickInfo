@@ -96,7 +96,10 @@ def main():
             
             # Calculer la somme totale des opérations
             total_operations = line_counts_df["Nombre d'opérations"].astype(int).sum()
-            
+            # Restaurer l'ordre original pour les types "Reçu"
+            if 'Type' in details_df.columns:
+                details_df.loc[details_df['Type'] == 'Reçu', ['Appelant', 'Appelé']] = \
+                    details_df.loc[details_df['Type'] == 'Reçu', ['Appelé', 'Appelant']].values
             # Afficher la somme totale des opérations
             st.subheader(f"Total des opérations : {total_operations}")
     

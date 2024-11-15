@@ -45,7 +45,6 @@ def main():
             
         except Exception as e:
             st.error(f"Erreur lors de la lecture du fichier Excel : {e}")
-    
         # Vérification de la colonne 'Appelant' et 'Appelé'
         if 'Appelant' not in details_df.columns or 'Appelé' not in details_df.columns:
             st.error("Les colonnes 'Appelant' ou 'Appelé' ne sont pas présentes dans le fichier Excel.")
@@ -57,21 +56,17 @@ def main():
                 # Si le type est "Reçu", échanger les colonnes 'Appelant' et 'Appelé'
                 details_df.loc[details_df['Type'] == 'Reçu', ['Appelant', 'Appelé']] = \
                     details_df.loc[details_df['Type'] == 'Reçu', ['Appelé', 'Appelant']].values
-    
-        
-        else:
+            
             # Appliquer les règles de transformation des numéros pour les numéros dans le fichier texte
             numeros_list = num_file.read().decode('latin1').strip().split(';')
             
             # Appliquer la fonction transform_number sur chaque numéro dans la liste
             numeros_list = [transform_number(numero) for numero in numeros_list]
-    
-            # Afficher le nombre total de numéros dans le fichier texte après transformation
-            st.subheader(f"Nombre total de numéros : {len(numeros_list)}")
-    
+        
             # Appliquer la transformation sur les colonnes 'Appelant' et 'Appelé' dans le DataFrame
             details_df['Appelant'] = details_df['Appelant'].apply(transform_number)
             details_df['Appelé'] = details_df['Appelé'].apply(transform_number)
+
     
             # Initialisation du writer pour créer un fichier Excel avec une feuille par numéro
             output_file = f'Details_par_numero_{current_time}.xlsx'
@@ -81,7 +76,7 @@ def main():
             with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
                 for numero in numeros_list:
                     # Filtrer les données pour chaque numéro
-                    numero_df = details_df[(details_df['Appelant'] == numero) ]
+                    numero_df = details_df[(details_df['Appelant'] == numero) | (details_df['Appelé'] == numero)]
     
                     # Si des données sont trouvées, les écrire dans une feuille dédiée
                     if not numero_df.empty:

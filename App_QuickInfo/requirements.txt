@@ -2,3 +2,4 @@ xlsxwriter
 pyperclip   
 pandas
 streamlit            
+openpyxl

@@ -49,6 +49,15 @@ def main():
         # Vérification de la colonne 'Appelant' et 'Appelé'
         if 'Appelant' not in details_df.columns or 'Appelé' not in details_df.columns:
             st.error("Les colonnes 'Appelant' ou 'Appelé' ne sont pas présentes dans le fichier Excel.")
+        else:
+            # Vérification de la colonne 'Type'
+            if 'Type' not in details_df.columns:
+                st.error("La colonne 'Type' n'est pas présente dans le fichier Excel.")
+            else:
+                # Si le type est "Reçu", échanger les colonnes 'Appelant' et 'Appelé'
+                details_df.loc[details_df['Type'] == 'Reçu', ['Appelant', 'Appelé']] = \
+                    details_df.loc[details_df['Type'] == 'Reçu', ['Appelé', 'Appelant']].values
+    
         
         else:
             # Appliquer les règles de transformation des numéros pour les numéros dans le fichier texte

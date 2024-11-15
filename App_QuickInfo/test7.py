@@ -72,7 +72,7 @@ def main():
             with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
                 for numero in numeros_list:
                     # Filtrer les données pour chaque numéro
-                    numero_df = details_df[(details_df['Appelant'] == numero) | (details_df['Appelé'] == numero)]
+                    numero_df = details_df[(details_df['Appelant'] == numero) ]
     
                     # Si des données sont trouvées, les écrire dans une feuille dédiée
                     if not numero_df.empty:

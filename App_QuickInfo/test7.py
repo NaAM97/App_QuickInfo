@@ -63,6 +63,8 @@ def main():
             # Appliquer la fonction transform_number sur chaque numéro dans la liste
             numeros_list = [transform_number(numero) for numero in numeros_list]
         
+            # Afficher le nombre total de numéros dans le fichier texte après transformation
+            st.subheader(f"Nombre total de numéros : {len(numeros_list)}")
             # Appliquer la transformation sur les colonnes 'Appelant' et 'Appelé' dans le DataFrame
             details_df['Appelant'] = details_df['Appelant'].apply(transform_number)
             details_df['Appelé'] = details_df['Appelé'].apply(transform_number)
@@ -76,7 +78,7 @@ def main():
             with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
                 for numero in numeros_list:
                     # Filtrer les données pour chaque numéro
-                    numero_df = details_df[(details_df['Appelant'] == numero) ]
+                    numero_df = details_df[(details_df['Appelant'] == numero) | (details_df['Appelé'] == numero)]
     
                     # Si des données sont trouvées, les écrire dans une feuille dédiée
                     if not numero_df.empty:

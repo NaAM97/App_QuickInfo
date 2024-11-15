@@ -69,7 +69,9 @@ def main():
             details_df['Appelant'] = details_df['Appelant'].apply(transform_number)
             details_df['Appelé'] = details_df['Appelé'].apply(transform_number)
 
-    
+            if 'Type' in details_df.columns:
+                details_df.loc[details_df['Type'] == 'Reçu', ['Appelant', 'Appelé']] = \
+                    details_df.loc[details_df['Type'] == 'Reçu', ['Appelé', 'Appelant']].values            
             # Initialisation du writer pour créer un fichier Excel avec une feuille par numéro
             output_file = f'Details_par_numero_{current_time}.xlsx'
             line_counts = []  # Liste pour stocker le nombre de lignes par numéro
@@ -97,9 +99,7 @@ def main():
             # Calculer la somme totale des opérations
             total_operations = line_counts_df["Nombre d'opérations"].astype(int).sum()
             # Restaurer l'ordre original pour les types "Reçu"
-            if 'Type' in details_df.columns:
-                details_df.loc[details_df['Type'] == 'Reçu', ['Appelant', 'Appelé']] = \
-                    details_df.loc[details_df['Type'] == 'Reçu', ['Appelé', 'Appelant']].values
+
             # Afficher la somme totale des opérations
             st.subheader(f"Total des opérations : {total_operations}")
     

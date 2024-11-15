@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-st.image("logo.png", width=300)
+st.image("App_QuickInfo/logo.png", width=300)
 # Titre de la page d'accueil
 st.title("Bienvenue sur l'application QuickInfo ")
 

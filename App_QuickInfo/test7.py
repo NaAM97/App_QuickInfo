@@ -72,8 +72,10 @@ def main():
                 for numero in numeros_list:
                     # Vérifier si la colonne 'Type' existe et gérer en conséquence
                     if 'Type' in details_df.columns:
-                        numero_df = details_df[
-                            ((details_df['Type'] == 'Reçu') & (details_df['Appelé'] == numero))]
+                         numero_df = details_df[
+                                            ((details_df['Type'] == 'Reçu') & (details_df['Appelant'] == numero)) |
+                                            (details_df['Appelé'] == numero)
+                                        ]
                                                  
                     else:
                         numero_df = details_df[details_df['Appelé'] == numero]

@@ -66,9 +66,18 @@ if excel_file and num_file:
         
         with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
             for numero in numeros_list:
-                # Filtrer les données pour chaque numéro
-                numero_df = details_df[((details_df['Type'] == 'Émis') & (details_df['Appelant'] == numero)) |
-                        ((details_df['Type'] == 'Reçu') & (details_df['Appelé'] == numero))]
+
+                # Filtrer les lignes pour le type 'Émis'
+                emitted_df = details_df[details_df['Type'] == 'Émis']
+                emitted_df = emitted_df[emitted_df['Appelant'] == numero]
+                
+                # Filtrer les lignes pour le type 'Reçu'
+                received_df = details_df[details_df['Type'] == 'Reçu']
+                received_df = received_df[received_df['Appelé'] == numero]
+                
+                # Combiner les deux DataFrames sans doublons
+                numero_df = pd.concat([emitted_df, received_df]).drop_duplicates()
+
 
                 # Si des données sont trouvées, les écrire dans une feuille dédiée
                 if not numero_df.empty:

@@ -132,8 +132,9 @@ def main():
             
             # Filtrer et supprimer les numéros commençant par "06576" ou dans la plage "0663977000 - 0663978000"
             results_df = results_df[~results_df['Appelé'].str.startswith('06576')]  # Exclure les numéros commençant par "06576"
-            results_df = results_df[~results_df['Appelé'].isin(['0663977000', '0663978000','0346', '0600000001', '065777605690', '0657771086627', '0771086627'])]  # Exclure les numéros dans la plage
-
+            results_df = results_df[~results_df['Appelé'].isin(['0663977000', '0663978000','0657776056090', '0771086627','0657771086627'])]  # Exclure les numéros 
+             results_df = results_df[~results_df['Appelant'].isin(['0346', '0600000001', '0771086627'])]  # Exclure les numéros 
+            
             # Exclure les lignes où 'Appelant' ou 'Appelé' contient une lettre
             results_df = results_df[~results_df['Appelant'].str.contains(r'[a-zA-Z]', na=False)]
             results_df = results_df[~results_df['Appelé'].str.contains(r'[a-zA-Z]', na=False)]

@@ -70,11 +70,13 @@ def main():
             
             with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
                 for numero in numeros_list:
-                    if details_df['Type'] == 'Reçu':
-                       # Filtrer les données pour chaque numéro
-                       numero_df = details_df[(details_df['Appelant'] == numero)]
-                    else :   
-                        numero_df = details_df[(details_df['Appelé'] == numero)]
+                    # Vérifier si la colonne 'Type' existe et gérer en conséquence
+                    if 'Type' in details_df.columns:
+                        numero_df = details_df[
+                            ((details_df['Type'] == 'Reçu') & (details_df['Appelé'] == numero))]
+                                                 
+                    else:
+                        numero_df = details_df[details_df['Appelé'] == numero]
     
                     # Si des données sont trouvées, les écrire dans une feuille dédiée
                     if not numero_df.empty:

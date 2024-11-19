@@ -132,17 +132,13 @@ def main():
             
             # Filtrer et supprimer les numéros commençant par "06576" ou dans la plage "0663977000 - 0663978000"
             results_df = results_df[~results_df['Appelé'].str.startswith('06576')]  # Exclure les numéros commençant par "06576"
-            results_df = results_df[~results_df['Appelé'].isin(['0663977000', '0663978000'])]  # Exclure les numéros dans la plage
+            results_df = results_df[~results_df['Appelé'].isin(['0663977000', '0663978000','0346', '0600000001', '065777605690', '0657771086627', '0771086627'])]  # Exclure les numéros dans la plage
 
             # Exclure les lignes où 'Appelant' ou 'Appelé' contient une lettre
             results_df = results_df[~results_df['Appelant'].str.contains(r'[a-zA-Z]', na=False)]
             results_df = results_df[~results_df['Appelé'].str.contains(r'[a-zA-Z]', na=False)]
 
-            # Exclure les numéros spécifiques dans 'Appelant' ou 'Appelé'
-            exclude_numbers = ['0346', '0600000001', '065777605690', '0657771086627', '0771086627']
-            results_df = results_df[~results_df['Appelant'].isin(exclude_numbers)]
-            results_df = results_df[~results_df['Appelé'].isin(exclude_numbers)]
-
+    
             # Fusion avec les détails de localisation
             results_df = results_df.merge(location_df, left_on='Cell ID', right_on='Cells', how='left')
             results_df.drop(columns='Cells', inplace=True, errors='ignore')

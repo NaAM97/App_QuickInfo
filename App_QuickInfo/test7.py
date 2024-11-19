@@ -13,15 +13,13 @@ def main():
     def transform_number(number):
         """Appliquer les règles de transformation des numéros."""
         if number.startswith('00'):
-            return  '0' + number[2:]  # Remplacer '00' par '0'
+            return '0' + number[2:]  # Remplacer '00' par '0'
         elif number.startswith('0'):
             return number  # Aucun changement si le numéro commence par 0
         elif number.startswith('212'):
             return '0' + number[3:]  # Remplacer '212' par '0'
-
         else:
             return '0' + number  # Ajouter un 0 si le numéro ne commence ni par 0 ni par 212 ni par 00
-    
     
     # Téléchargement du fichier Excel contenant les détails
     st.subheader("1️⃣ Charger le fichier Excel contenant les détails des appels et SMS")
@@ -45,47 +43,51 @@ def main():
             
         except Exception as e:
             st.error(f"Erreur lors de la lecture du fichier Excel : {e}")
-        # Vérification de la colonne 'Appelant' et 'Appelé'
+        
+        # Vérification des colonnes nécessaires
         if 'Appelant' not in details_df.columns or 'Appelé' not in details_df.columns:
             st.error("Les colonnes 'Appelant' ou 'Appelé' ne sont pas présentes dans le fichier Excel.")
         else:
+            # Vérification de la colonne 'Type'
+            if 'Type' not in details_df.columns:
+                st.error("La colonne 'Type' n'est pas présente dans le fichier Excel.")
+            else:
+                # Si le type est "Reçu", échanger les colonnes 'Appelant' et 'Appelé'
+                details_df.loc[details_df['Type'] == 'Reçu', ['Appelant', 'Appelé']] = \
+                    details_df.loc[details_df['Type'] == 'Reçu', ['Appelé', 'Appelant']].values
             
-            # Appliquer les règles de transformation des numéros pour les numéros dans le fichier texte
+            # Appliquer la transformation sur les numéros du fichier texte
             numeros_list = num_file.read().decode('latin1').strip().split(';')
-            
             # Appliquer la fonction transform_number sur chaque numéro dans la liste
             numeros_list = [transform_number(numero) for numero in numeros_list]
         
-            # Afficher le nombre total de numéros dans le fichier texte après transformation
-            st.subheader(f"Nombre total de numéros : {len(numeros_list)}")
             # Appliquer la transformation sur les colonnes 'Appelant' et 'Appelé' dans le DataFrame
             details_df['Appelant'] = details_df['Appelant'].apply(transform_number)
             details_df['Appelé'] = details_df['Appelé'].apply(transform_number)
 
-          
             # Initialisation du writer pour créer un fichier Excel avec une feuille par numéro
             output_file = f'Details_par_numero_{current_time}.xlsx'
             line_counts = []  # Liste pour stocker le nombre de lignes par numéro
             non_found_numbers = []  # Liste pour stocker les numéros non trouvés
             
+            # Filtrage en fonction du type et des numéros
             with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
                 for numero in numeros_list:
-                    # Vérifier si la colonne 'Type' existe et gérer en conséquence
-                    if 'Type' in details_df.columns:
-                         numero_df = details_df[
-                                            ((details_df['Type'] == 'Reçu') & (details_df['Appelant'] == numero)) |
-                                            (details_df['Appelé'] == numero)
-                                        ]
-                                                 
-                    else:
-                        numero_df = details_df[details_df['Appelé'] == numero]
-    
-                    # Si des données sont trouvées, les écrire dans une feuille dédiée
-                    if not numero_df.empty:
-                        numero_df.to_excel(writer, sheet_name=str(numero), index=False)
-                        line_counts.append({"Numéro": numero, "Nombre d'opérations": str(len(numero_df))})  # Ajouter aux résultats
-                    else:
-                        non_found_numbers.append(numero)  # Ajouter le numéro à la liste des non trouvés
+                    if numero in details_df['Appelant'].values or numero in details_df['Appelé'].values:
+                        # Filtrer les données selon le type et numéro
+                        if numero in details_df[details_df['Type'] == 'Émis']['Appelant'].values:
+                            numero_df = details_df[details_df['Type'] == 'Émis'][details_df['Appelant'] == numero]
+                        elif numero in details_df[details_df['Type'] == 'Reçu']['Appelé'].values:
+                            numero_df = details_df[details_df['Type'] == 'Reçu'][details_df['Appelé'] == numero]
+                        else:
+                            continue
+
+                        # Si des données sont trouvées, les écrire dans une feuille dédiée
+                        if not numero_df.empty:
+                            numero_df.to_excel(writer, sheet_name=str(numero), index=False)
+                            line_counts.append({"Numéro": numero, "Nombre d'opérations": str(len(numero_df))})  # Ajouter aux résultats
+                        else:
+                            non_found_numbers.append(numero)  # Ajouter le numéro à la liste des non trouvés
     
             # Convertir les résultats en DataFrame pour un affichage sous forme de tableau
             line_counts_df = pd.DataFrame(line_counts).sort_values(by="Nombre d'opérations", ascending=False, ignore_index=True)
@@ -96,8 +98,7 @@ def main():
             
             # Calculer la somme totale des opérations
             total_operations = line_counts_df["Nombre d'opérations"].astype(int).sum()
-            # Restaurer l'ordre original pour les types "Reçu"
-
+            
             # Afficher la somme totale des opérations
             st.subheader(f"Total des opérations : {total_operations}")
     

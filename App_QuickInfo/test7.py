@@ -41,14 +41,18 @@ if excel_file and num_file:
     except Exception as e:
         st.error(f"Erreur lors de la lecture du fichier Excel : {e}")
 
-    # Vérification de la colonne 'Appelant' et 'Appelé'
-    if 'Appelant' not in details_df.columns or 'Appelé' not in details_df.columns:
-        st.error("Les colonnes 'Appelant' ou 'Appelé' ne sont pas présentes dans le fichier Excel.")
+    # Vérification de la colonne 'Appelant', 'Appelé' et 'Type'
+    if 'Appelant' not in details_df.columns or 'Appelé' not in details_df.columns or 'Type' not in details_df.columns:
+        st.error("Les colonnes 'Appelant', 'Appelé' ou 'Type' sont manquantes dans le fichier Excel.")
     
     else:
         # Appliquer les règles de transformation des numéros pour les numéros dans le fichier texte
-        numeros_list = num_file.read().decode('latin1').strip().split(';')
-        
+        try:
+            numeros_list = num_file.read().decode('utf-8').strip().split(';')
+        except Exception as e:
+            st.error(f"Erreur lors de la lecture du fichier texte des numéros : {e}")
+            numeros_list = []
+
         # Appliquer la fonction transform_number sur chaque numéro dans la liste
         numeros_list = [transform_number(numero) for numero in numeros_list]
 
@@ -64,28 +68,31 @@ if excel_file and num_file:
         line_counts = []  # Liste pour stocker le nombre de lignes par numéro
         non_found_numbers = []  # Liste pour stocker les numéros non trouvés
         
-        with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
-            for numero in numeros_list:
+        try:
+            with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
+                for numero in numeros_list:
 
-                # Filtrer les lignes pour le type 'Émis'
-                emitted_df = details_df[details_df['Type'] == 'Émis']
-                emitted_df = emitted_df[emitted_df['Appelant'] == numero]
-                
-                # Filtrer les lignes pour le type 'Reçu'
-                received_df = details_df[details_df['Type'] == 'Reçu']
-                received_df = received_df[received_df['Appelé'] == numero]
-                
-                # Combiner les deux DataFrames sans doublons
-                numero_df = pd.concat([emitted_df, received_df]).drop_duplicates()
+                    # Filtrer les lignes pour le type 'Émis'
+                    emitted_df = details_df[details_df['Type'] == 'Émis']
+                    emitted_df = emitted_df[emitted_df['Appelant'] == numero]
+                    
+                    # Filtrer les lignes pour le type 'Reçu'
+                    received_df = details_df[details_df['Type'] == 'Reçu']
+                    received_df = received_df[received_df['Appelé'] == numero]
+                    
+                    # Combiner les deux DataFrames sans doublons
+                    numero_df = pd.concat([emitted_df, received_df]).drop_duplicates()
 
+                    # Si des données sont trouvées, les écrire dans une feuille dédiée
+                    if not numero_df.empty:
+                        numero_df.to_excel(writer, sheet_name=str(numero), index=False)
+                        line_counts.append({"Numéro": numero, "Nombre d'opérations": str(len(numero_df))})  # Ajouter aux résultats
+                    else:
+                        non_found_numbers.append(numero)  # Ajouter le numéro à la liste des non trouvés
 
-                # Si des données sont trouvées, les écrire dans une feuille dédiée
-                if not numero_df.empty:
-                    numero_df.to_excel(writer, sheet_name=str(numero), index=False)
-                    line_counts.append({"Numéro": numero, "Nombre d'opérations": str(len(numero_df))})  # Ajouter aux résultats
-                else:
-                    non_found_numbers.append(numero)  # Ajouter le numéro à la liste des non trouvés
-
+        except Exception as e:
+            st.error(f"Erreur lors de l'écriture dans le fichier Excel : {e}")
+        
         # Convertir les résultats en DataFrame pour un affichage sous forme de tableau
         line_counts_df = pd.DataFrame(line_counts).sort_values(by="Nombre d'opérations", ascending=False, ignore_index=True)
 
@@ -106,12 +113,16 @@ if excel_file and num_file:
 
         # Bouton pour télécharger le fichier Excel généré
         st.subheader("Télécharger le fichier Excel avec les détails par numéro")
-        with open(output_file, "rb") as f:
-            st.download_button(
-                label="💾 Télécharger le fichier Excel",
-                data=f,
-                file_name=output_file,
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+        try:
+            with open(output_file, "rb") as f:
+                st.download_button(
+                    label="💾 Télécharger le fichier Excel",
+                    data=f,
+                    file_name=output_file,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+        except Exception as e:
+            st.error(f"Erreur lors du téléchargement du fichier Excel : {e}")
+
 else:
     st.info("Veuillez télécharger les deux fichiers pour lancer l'analyse.")

@@ -54,11 +54,11 @@ def main():
             with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
                 for numero in numeros_list:
                     # Filtrer les données selon le type
-                    numero_df = details_df[
-                        ((details_df['Type'] == 'Émis') & (details_df['Appelant'] == numero)) |
-                        ((details_df['Type'] == 'Reçu') & (details_df['Appelé'] == numero))
-                    ]
-                    
+                    if details_df['Type'] == 'Émis' :
+                        numero_df=details_df[details_df['Appelant'] == numero]
+                    else :
+                        numero_df=details_df[details_df['Appelant'] == numero)]
+                                       
                     if not numero_df.empty:
                         numero_df.to_excel(writer, sheet_name=str(numero), index=False)
                         line_counts.append({"Numéro": numero, "Nombre d'opérations": len(numero_df)})

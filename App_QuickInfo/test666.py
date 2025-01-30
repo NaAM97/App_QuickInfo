@@ -115,7 +115,7 @@ def main():
                             'Adresse': row.get('Adresse', None),
                             'IMEI': row.get('IMEI', None),
                             'Cell ID': row.get('Cgi', None),
-                            'Fichier': file_name
+                            
                         })
 
             if 's_c' in dataframes: search_in_df(dataframes['s_c'], 's_c')
@@ -129,11 +129,13 @@ def main():
             # Création du DataFrame de résultats
             results_df = pd.DataFrame(results)
             results_df = results_df.drop_duplicates()
+            results_df = results_df[(results_df['IMEI'] != '#EMPTY') & (results_df['Cell ID'] != '#EMPTY')] ############################################################
+
             
             # Filtrer et supprimer les numéros commençant par "06576" ou dans la plage "0663977000 - 0663978000"
             results_df = results_df[~results_df['Appelé'].str.startswith('06576')]  # Exclure les numéros commençant par "06576"
-            results_df = results_df[~results_df['Appelé'].str.startswith('06577')]  # Exclure les numéros commençant par "06577"
-            results_df = results_df[~results_df['Appelé'].isin(['0663977000', '0663978000','0657776056090', '0771086627','0657771086627'])]  # Exclure les numéros 
+            results_df = results_df[~(results_df['Appelé'].str.startswith('06577') & (results_df['Appelé'].str.len() > 10))]
+            results_df = results_df[~results_df['Appelé'].isin(['0663977000', '0663978000', '0771086627'])]  # Exclure les numéros 
             results_df = results_df[~results_df['Appelant'].isin(['0346', '0600000001', '0771086627'])]  # Exclure les numéros 
             
             # Exclure les lignes où 'Appelant' ou 'Appelé' contient une lettre

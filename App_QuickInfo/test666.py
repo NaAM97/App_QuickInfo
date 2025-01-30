@@ -129,7 +129,7 @@ def main():
             # Création du DataFrame de résultats
             results_df = pd.DataFrame(results)
             results_df = results_df.drop_duplicates()
-            results_df = results_df[(results_df['IMEI'] != '#EMPTY') & (results_df['Cell ID'] != '#EMPTY')] ############################################################
+            results_df = results_df.replace("#EMPTY", "") ############################################################
 
             
             # Filtrer et supprimer les numéros commençant par "06576" ou dans la plage "0663977000 - 0663978000"

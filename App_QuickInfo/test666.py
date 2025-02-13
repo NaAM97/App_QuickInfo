@@ -22,7 +22,7 @@ def main():
 
     # Fonction pour charger et nettoyer les données d'appels et SMS
     def load_and_clean_data(file):
-        df = pd.read_csv(file, sep='\t', encoding='latin1')    
+        df = pd.read_csv(file, sep='\t', encoding='latin1',dtype={'Cgi': str,'IMEI': str})    
         if 'Date Naissance' in df.columns:
             df['Date Naissance'] = pd.to_datetime(df['Date Naissance'], errors='coerce')
         df.columns = [col if not col.endswith('Identification') else 'Numero Identification' for col in df.columns]
